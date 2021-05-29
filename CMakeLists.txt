@@ -101,7 +101,7 @@ find_package(llvm)
 find_package(clang)
 find_package(lld)
 
-if(APPLE AND ZIG_STATIC)
+if(APPLE AND ZIG_STATIC AND ZIG_USE_LLVM_CONFIG)
     list(REMOVE_ITEM LLVM_LIBRARIES "-lz")
     find_library(ZLIB NAMES libz.a z zlib libz)
     list(APPEND LLVM_LIBRARIES "${ZLIB}")
@@ -719,6 +719,11 @@ target_link_libraries(zigcpp LINK_PUBLIC
     ${LLVM_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
 )
+
+if(NOT ZIG_USE_LLVM_CONFIG)
+  find_library(STATIC_ZLIB NAMES libz.a libzlibstatic.a z zlib)
+  target_link_libraries(zigcpp LINK_PUBLIC ${STATIC_ZLIB})
+endif()
 
 add_library(opt_c_util STATIC ${OPTIMIZED_C_SOURCES})
 set_target_properties(opt_c_util PROPERTIES
